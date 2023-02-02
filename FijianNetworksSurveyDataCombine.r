@@ -30,6 +30,9 @@ only_need <- inner_join(individuals, households, by="record_id", na = character(
 
 collate <-select(survey_import_data) %>% bind_rows(survey_import_data, only_need)
 
+# Duplicate original record id for reference, as we will be assigning new record_ids on import
+collate$original_record_id <- collate$record_id
+
 ##################################################
 # Creating each visits data so its pre-populated #
 ##################################################
