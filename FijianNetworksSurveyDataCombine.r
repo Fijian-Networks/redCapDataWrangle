@@ -14,12 +14,13 @@ individuals=read_csv('individuals.csv',col_types = cols(.default = "c"), na = ch
 # Load Household Data #
 #######################
 households=read_csv('households.csv',col_types = cols(.default = "c"), na = character()) %>% select(-contains("house_photo"))
+households$household_id = as.numeric(households$household_id)
 
 #####################################
 # Import Individual Survey Template #
 #####################################
 survey_import_data=read_csv('survey_import.csv',col_types = cols(.default = "c"), na = character())
-
+survey_import_data$household_id = as.numeric(survey_import_data$household_id)
 
 ############################
 # Merging appropriate Data #
@@ -30,6 +31,8 @@ only_need <- inner_join(individuals, households, by="record_id", na = character(
 
 collate <-select(survey_import_data) %>% bind_rows(survey_import_data, only_need)
 collate$original_record_id <- collate$record_id
+collate$household_id = as.numeric(collate$household_id)
+collate$household_id = sprintf("%05.1f",collate$household_id)
 
 ##################################################
 # Creating each visits data so its pre-populated #
@@ -50,7 +53,7 @@ visit3 <- collate %>% mutate_at(c('redcap_event_name'), ~replace_na(.,"visit_3_a
   mutate_if(is.character, ~replace_na(.,"")) %>% select(-contains("...416"))
 visit3$record_id <- 1:nrow(visit3)
 # make a list of them all and smash them together
-allData <- list(visit1, visit2, visit3) %>% bind_rows()  %>% group_by(record_id) %>% arrange(record_id)
+allData <- list(visit1, visit2, visit3) %>% bind_rows()  %>% group_by(household_id) %>% arrange(household_id)
 
   
 write_csv(visit1, "Visit1_ImportData.csv")
