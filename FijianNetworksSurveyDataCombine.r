@@ -29,27 +29,34 @@ only_need <- inner_join(individuals, households, by="record_id", na = character(
   select(-contains("redcap")) %>% select(-contains("...416"))
 
 collate <-select(survey_import_data) %>% bind_rows(survey_import_data, only_need)
-
-# Duplicate original record id for reference, as we will be assigning new record_ids on import
 collate$original_record_id <- collate$record_id
 
 ##################################################
 # Creating each visits data so its pre-populated #
+# Also, reassigning record_id so that            #
+# import into redcap doesn't miss anyone         #
 ##################################################
-visit1 <- collate %>% mutate_at(c('redcap_event_name'), ~replace_na(.,"visit_1_arm_1")) %>%
-  mutate_if(is.character, ~replace_na(.,"")) %>% select(-contains("...416"))
+visit1 <- collate %>% 
+  mutate_at(c('redcap_event_name'), ~replace_na(.,"visit_1_arm_1")) %>%
+  mutate_if(is.character, ~replace_na(.,"")) %>%
+  select(-contains("...416"))
+visit1$record_id <- 1:nrow(visit1)
 
 visit2 <- collate %>% mutate_at(c('redcap_event_name'), ~replace_na(.,"visit_2_arm_1")) %>%
   mutate_if(is.character, ~replace_na(.,"")) %>% select(-contains("...416"))
+visit2$record_id <- 1:nrow(visit2)
 
 visit3 <- collate %>% mutate_at(c('redcap_event_name'), ~replace_na(.,"visit_3_arm_1")) %>%
   mutate_if(is.character, ~replace_na(.,"")) %>% select(-contains("...416"))
-
+visit3$record_id <- 1:nrow(visit3)
 # make a list of them all and smash them together
 allData <- list(visit1, visit2, visit3) %>% bind_rows()  %>% group_by(record_id) %>% arrange(record_id)
 
   
+write_csv(visit1, "Visit1_ImportData.csv")
+
 write_csv(allData, "ImportData.csv")
+
 
 
 # Extremely useful things for a casual R user...
