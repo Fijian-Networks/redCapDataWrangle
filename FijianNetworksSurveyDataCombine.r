@@ -1,7 +1,6 @@
 #Clear existing individuals_df and graphics
 rm(list=ls())
 graphics.off()
-#Load Hmisc library
 library(tidyverse)
 library(dplyr)
 
@@ -47,7 +46,7 @@ visit3 <- collate %>% mutate_at(c('redcap_event_name'), ~replace_na(.,"visit_3_a
 allData <- list(visit1, visit2, visit3) %>% bind_rows()  %>% group_by(record_id) %>% arrange(record_id)
 
   
-write_csv(allData, "test.csv")
+write_csv(allData, "ImportData.csv")
 
 
 # Extremely useful things for a casual R user...
